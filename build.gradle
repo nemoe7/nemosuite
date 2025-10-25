@@ -76,10 +76,10 @@ subprojects {
 }
 
 task collectJars {
-  dependsOn ':fabric:build', ':forge:build'
+  dependsOn ':common:build', ':fabric:build', ':forge:build'
 
   doLast {
-    def dest = file("$buildDir/libs")
+    def dest = file("$buildDir")
     dest.mkdirs()
 
     // Fabric
