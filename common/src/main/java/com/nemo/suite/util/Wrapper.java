@@ -75,4 +75,18 @@ public class Wrapper {
 
     playerAttackEntity(player, target);
   }
+
+  /**
+   * @return the attack range of the player (implemented in ReachHelper)
+   */
+  public static double getEntityReach() {
+    return ReachHelper.getEntityReach(client.player);
+  }
+
+  /**
+   * @return the reach of the player (implemented in ReachHelper)
+   */
+  public static double getBlockReach() {
+    return ReachHelper.getBlockReach(client.player);
+  }
 }
