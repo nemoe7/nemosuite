@@ -1,0 +1,44 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+#issueTrackerURL = ""
+license = "LGPL-3.0-only"
+
+[[mods]]
+modId = "nemosuite"
+version = "${version}"
+displayName = "NemoSuite"
+displayURL="https://github.com/nemoe7/nemosuite"
+logoFile = "icon.png"
+credits="I'd like to thank my mother and father."
+authors = "nemoe7"
+description = '''
+A collection of (controversial) tweaks for Minecraft.
+'''
+
+[[dependencies.nemosuite]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.nemosuite]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.nemosuite]]
+modId = "architectury"
+mandatory = true
+versionRange = "[4.12.94,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.nemosuite]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[6.5.133,)"
+ordering = "AFTER"
+side = "CLIENT"

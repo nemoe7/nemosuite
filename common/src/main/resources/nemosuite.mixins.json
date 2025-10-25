@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.nemo.suite.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+    "SharedConstantsMixin"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
