@@ -15,6 +15,7 @@ NemoSuite provides a collection of (controversial) tweaks to Minecraft.
 Current modules include:
 - ⚔️ **Auto Attack** — Automatically attacks when holding down the attack key.
 - 🏷️ **Allow Section Sign Everywhere** — Allows the `§` symbol everywhere.
+- 🎯 **Aim Assist** — Aim assist for mobs with configurable combat timeout.
 
 *(More tweaks planned — stay tuned!)*
 
