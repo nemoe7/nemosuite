@@ -2,7 +2,7 @@
 
 A lightweight collection of client-side tweaks for Minecraft.
 
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![License: GPL v3 only](https://img.shields.io/badge/License-GPL%20v3%20only-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.18.2-blue)
 ![Mod Loader](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge-green)
 ![Architectury](https://img.shields.io/badge/API-Architectury-orange)
@@ -30,8 +30,8 @@ Current modules include:
 ---
 
 ## 🧠 License
-This project is licensed under the **GNU Lesser General Public License v3.0 only (LGPL-3.0-only)**.
-You’re free to use, modify, and redistribute this project under the same license — but derivative works must remain open-source.
+This project is licensed under the **GNU General Public License v3.0 only (GPL-3.0-only)**.
+You’re free to use, modify, and redistribute this project under the same license — but derivative works must also be licensed under GPL-3.0-only.
 
 ---
 
