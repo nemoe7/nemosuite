@@ -6,16 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nemo.suite.config.ClientConfig;
+import com.nemo.suite.core.AimAssist;
 import com.nemo.suite.core.AutoAttack;
 import com.nemo.suite.util.Wrapper;
 
 import dev.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
+import me.shedaniel.autoconfig.event.ConfigSerializeEvent;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
-import me.shedaniel.autoconfig.event.ConfigSerializeEvent;
 
 public final class NemoSuiteMod {
   public static final String MOD_ID = "nemosuite";
@@ -48,6 +49,7 @@ public final class NemoSuiteMod {
 
   private static void initConfig() {
     config = AutoConfig.getConfigHolder(ClientConfig.class).getConfig();
+    AimAssist.init();
     AutoAttack.init();
   }
 
@@ -57,7 +59,10 @@ public final class NemoSuiteMod {
     }
 
     if (isPlayerPlaying()) {
-      AutoAttack.tick();
+      if (config.aimAssist.enabled)
+        AimAssist.tick();
+      if (config.autoAttack.enabled)
+        AutoAttack.tick();
     }
   }
 }
