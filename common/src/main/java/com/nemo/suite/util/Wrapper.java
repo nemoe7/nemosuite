@@ -8,6 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -154,7 +155,7 @@ public class Wrapper {
     Entity closest = null;
 
     for (Entity entity : entities) {
-      if (entity == null || entity.isRemoved() || entity.isInvulnerable())
+      if (entity == null || entity.isRemoved() || entity.isInvulnerable() || (entity instanceof LivingEntity living && living.isDeadOrDying()))
         continue;
 
       // Get distance between the two entities (rotations)
