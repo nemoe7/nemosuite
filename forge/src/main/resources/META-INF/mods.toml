@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[40,)"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/nemoe7/nemosuite/issues"
 license = "GPL-3.0-only"
 
 [[mods]]
