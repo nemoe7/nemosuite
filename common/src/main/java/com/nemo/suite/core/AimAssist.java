@@ -2,16 +2,18 @@ package com.nemo.suite.core;
 
 import static com.nemo.suite.util.Wrapper.getAttackCooldown;
 import static com.nemo.suite.util.Wrapper.getClosestEntityToCrosshair;
-import static com.nemo.suite.util.Wrapper.getClosestYawPitchBetween;
+import static com.nemo.suite.util.Wrapper.getClosestYawPitchToEntity;
 import static com.nemo.suite.util.Wrapper.getCrosshairEntity;
 import static com.nemo.suite.util.Wrapper.getMainHand;
 import static com.nemo.suite.util.Wrapper.getNearbyEntities;
+import static com.nemo.suite.util.Wrapper.isAttackReady;
 import static com.nemo.suite.util.Wrapper.rotatePlayer;
 
 import java.util.List;
 
 import com.nemo.suite.NemoSuiteMod;
 import com.nemo.suite.config.ClientConfig;
+import com.nemo.suite.config.ClientConfig.AimAssist.CombatTimeTypeEnum;
 import com.nemo.suite.util.Timer;
 
 import net.minecraft.world.entity.Entity;
@@ -23,36 +25,48 @@ public class AimAssist {
   private static boolean inCombat = false;
   private static Timer combatTimer = new Timer();
   private static ItemStack mainHand = ItemStack.EMPTY;
+  private static Entity target = null;
 
   public static void init() {
     config = NemoSuiteMod.config.aimAssist;
   }
 
   public static void tick() {
-    mainHand = getMainHand();
+    target = null;
 
     if (inCombat) {
-      int combatTime = config.maxCombatTime > 0 ? config.maxCombatTime : getAttackCooldown() * 2;
+      int combatTime = config.combatTime > 0 ? config.combatTime : 20 + getAttackCooldown();
 
-      if (combatTimer.reached(combatTime) || mainHand.toString() == getMainHand().toString()) {
+      if (config.combatTimeType == CombatTimeTypeEnum.ON_SWING ||
+          (config.combatTimeType == CombatTimeTypeEnum.ON_READY && isAttackReady())) {
+        combatTimer.tick();
+      }
+
+      if (combatTimer.reached(combatTime) ||
+          !mainHand.getDisplayName().equals(getMainHand().getDisplayName())) {
         combatTimer.reset();
         inCombat = false;
         return;
       }
-      combatTimer.tick();
 
       List<Entity> entities = getNearbyEntities(Mob.class);
-
       if (entities.isEmpty())
         return;
 
       Entity closest = getClosestEntityToCrosshair(entities);
-
       if (closest == null || (config.stopWhenReached && getCrosshairEntity() == closest))
         return;
 
-      float[] yawPitch = getClosestYawPitchBetween(closest);
-      rotatePlayer(yawPitch[0], yawPitch[1], config.maxYawStep, config.maxPitchStep);
+      target = closest;
+    }
+
+    mainHand = getMainHand();
+  }
+
+  public static void renderTick() {
+    if (inCombat && target != null) {
+      float[] yawPitch = getClosestYawPitchToEntity(target);
+      rotatePlayer(yawPitch[0], yawPitch[1], config.yawScale, config.pitchScale);
     }
   }
 

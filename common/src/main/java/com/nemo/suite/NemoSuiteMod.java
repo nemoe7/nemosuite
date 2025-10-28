@@ -65,4 +65,9 @@ public final class NemoSuiteMod {
         AutoAttack.tick();
     }
   }
+
+  public static void onRenderTick(float tickDelta) {
+    if (config.aimAssist.enabled)
+      AimAssist.renderTick();
+  }
 }

@@ -8,6 +8,8 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.nemo.suite.NemoSuiteMod;
 import com.nemo.suite.config.ClientConfig;
@@ -29,5 +31,10 @@ public final class NemoSuiteModForge {
 
     // Only do this on the client
     DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> NemoSuiteMod::initClient);
+  }
+
+  @SubscribeEvent
+  public static void onRender(TickEvent.RenderTickEvent event) {
+    NemoSuiteMod.onRenderTick(event.renderTickTime);
   }
 }

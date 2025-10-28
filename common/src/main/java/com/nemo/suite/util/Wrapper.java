@@ -1,6 +1,7 @@
 package com.nemo.suite.util;
 
 import java.util.List;
+import java.util.function.Function;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -10,9 +11,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -155,7 +159,8 @@ public class Wrapper {
     Entity closest = null;
 
     for (Entity entity : entities) {
-      if (entity == null || entity.isRemoved() || entity.isInvulnerable() || (entity instanceof LivingEntity living && living.isDeadOrDying()))
+      if (entity == null || entity.isRemoved() || entity.isInvulnerable()
+          || (entity instanceof LivingEntity living && living.isDeadOrDying()))
         continue;
 
       // Get distance between the two entities (rotations)
@@ -183,84 +188,82 @@ public class Wrapper {
    * @return the yaw and pitch to the closest visible scaled corner of the target
    */
   public static float[] getClosestYawPitchBetween(Entity source, Entity target) {
-    float[] bestYawPitch = new float[] { Float.MAX_VALUE, Float.MAX_VALUE };
-
+    Vec3 eyePos = source.position().add(0, source.getEyeHeight(), 0);
     AABB box = target.getBoundingBox();
     Vec3 center = box.getCenter();
 
-    // Midline from bottom center to top center
+    float srcYaw = source.getYRot();
+    float srcPitch = source.getXRot();
+    double reach = getEntityReach();
+
+    // Helper lambda to test if a rotation hits the target
+    Function<float[], Entity> rayHit = (rot) -> {
+      Vec3 dir = Vec3.directionFromRotation(rot[1], rot[0]);
+      Vec3 end = eyePos.add(dir.scale(reach));
+
+      // Check for blocks first
+      BlockHitResult blockHit = source.level.clip(new ClipContext(
+          eyePos, end,
+          ClipContext.Block.COLLIDER,
+          ClipContext.Fluid.NONE,
+          source));
+
+      // Shorten ray if it hits a block
+      Vec3 blockEnd = blockHit.getType() == HitResult.Type.MISS ? end : blockHit.getLocation();
+
+      // Then check for entities up to that point
+      EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+          source,
+          eyePos,
+          blockEnd,
+          source.getBoundingBox().expandTowards(dir.scale(reach)).inflate(1.0),
+          e -> e != source && e.isPickable(),
+          reach * reach);
+
+      return entityHit != null ? entityHit.getEntity() : null;
+    };
+
+    // === 1. Try yaw-only first ===
+    float[] yawPitch = Wrapper.getYawPitchBetween(
+        eyePos.x, eyePos.y, eyePos.z,
+        center.x, center.y, center.z);
+    yawPitch[1] = srcPitch;
+
+    Entity hit = rayHit.apply(yawPitch);
+    if (hit == target)
+      return yawPitch;
+
+    // === 2. Scan up/down the entity’s height ===
+    float[] best = { srcYaw, srcPitch };
+    float bestDelta = Float.MAX_VALUE;
+
     Vec3 bottom = new Vec3(center.x, box.minY, center.z);
     Vec3 top = new Vec3(center.x, box.maxY, center.z);
 
-    Vec3 eyePos = source.position().add(0, source.getEyeHeight(), 0);
-    float srcYaw = source.getYRot();
-    float srcPitch = source.getXRot();
-    double reach = getEntityReach() + 1;
+    for (float f : new float[] { 0.1f, 0.3f, 0.5f, 0.7f, 0.9f }) {
+      Vec3 sample = bottom.add(top.subtract(bottom).scale(f));
+      float[] test = Wrapper.getYawPitchBetween(
+          eyePos.x, eyePos.y, eyePos.z,
+          sample.x, sample.y, sample.z);
 
-    float[] factors = new float[] { 0.1f, 0.3f, 0.5f, 0.7f, 0.9f };
-
-    // --- Try current pitch at mid of line ---
-    Vec3 mid = bottom.add(top).scale(0.5);
-    float[] yawPitch = Wrapper.getYawPitchBetween(
-        eyePos.x, eyePos.y, eyePos.z, mid.x, mid.y, mid.z);
-
-    Vec3 dir = Vec3.directionFromRotation(srcPitch, srcYaw);
-
-    // Estimate intersection of view ray with vertical midline
-    double t = Math.abs(dir.x) > Math.abs(dir.z)
-        ? (mid.x - eyePos.x) / dir.x
-        : (mid.z - eyePos.z) / dir.z;
-
-    if (t > 0) {
-      double yAtLine = eyePos.y + dir.y * t;
-      if (yAtLine >= bottom.y && yAtLine <= top.y)
-        yawPitch[1] = srcPitch; // keep pitch if looking at line
-    }
-
-    Vec3 toMid = mid.subtract(eyePos);
-    if (toMid.length() <= reach) {
-      HitResult hit = source.level.clip(new ClipContext(
-          eyePos,
-          eyePos.add(toMid),
-          ClipContext.Block.COLLIDER,
-          ClipContext.Fluid.NONE,
-          source));
-
-      if (hit.getType() == HitResult.Type.MISS) {
-        return yawPitch; // unobstructed
+      hit = rayHit.apply(test);
+      if (hit == target) {
+        float delta = Mth.abs(test[0] - srcYaw) + Mth.abs(test[1] - srcPitch);
+        if (delta < bestDelta) {
+          best = test;
+          bestDelta = delta;
+        }
       }
     }
 
-    // --- If obstructed, scan up/down the line ---
-    for (float factor : factors) {
-      Vec3 point = bottom.add(top.subtract(bottom).scale(factor));
-      Vec3 toPoint = point.subtract(eyePos);
-      if (toPoint.length() > reach)
-        continue;
-
-      yawPitch = Wrapper.getYawPitchBetween(
-          eyePos.x, eyePos.y, eyePos.z, point.x, point.y, point.z);
-
-      HitResult hit = source.level.clip(new ClipContext(
-          eyePos,
-          eyePos.add(toPoint),
-          ClipContext.Block.COLLIDER,
-          ClipContext.Fluid.NONE,
-          source));
-
-      if (hit.getType() == HitResult.Type.MISS) {
-        return yawPitch;
-      }
-    }
-
-    return bestYawPitch;
+    return best;
   }
 
   /**
    * @param target the target entity
    * @return the yaw and pitch to the closest visible scaled corner of the target
    */
-  public static float[] getClosestYawPitchBetween(Entity target) {
+  public static float[] getClosestYawPitchToEntity(Entity target) {
     return getClosestYawPitchBetween(client.player, target);
   }
 
@@ -295,28 +298,32 @@ public class Wrapper {
    * Smoothly rotates the player toward the target yaw/pitch using mouse-like
    * input.
    *
-   * @param targetYaw    target yaw
-   * @param targetPitch  target pitch
-   * @param maxYawStep   max yaw change per tick
-   * @param maxPitchStep max pitch change per tick
+   * @param targetYaw   target yaw
+   * @param targetPitch target pitch
+   * @param yawScale    max yaw change per tick
+   * @param pitchScale  max pitch change per tick
    */
-  public static void rotatePlayer(float targetYaw, float targetPitch, float maxYawStep, float maxPitchStep) {
+  public static void rotatePlayer(float targetYaw, float targetPitch, float yawScale, float pitchScale) {
     LocalPlayer player = client.player;
     if (player == null)
       return;
 
-    // Calculate shortest angular difference
-    float yawDiff = Mth.wrapDegrees(targetYaw - player.getYRot());
-    float pitchDiff = Mth.wrapDegrees(targetPitch - player.getXRot());
+    float srcYaw = player.getYRot();
+    float srcPitch = player.getXRot();
 
-    // Clamp to max per-tick step
-    // float yawStep = Mth.clamp(yawDiff, -maxYawStep, maxYawStep);
-    // float pitchStep = Mth.clamp(pitchDiff, -maxPitchStep, maxPitchStep);
-    float yawStep = yawDiff * maxYawStep / 100f / 0.15f;
-    float pitchStep = pitchDiff * maxPitchStep / 100f / 0.15f;
+    float yawDiff = Mth.wrapDegrees(targetYaw - srcYaw);
+    float pitchDiff = Mth.wrapDegrees(targetPitch - srcPitch);
 
-    player.turn(yawStep, pitchStep);
-    // player.setYRot(player.getYRot() + yawStep);
-    // player.setXRot(player.getXRot() + pitchStep);
+    yawScale /= 100f;
+    pitchScale /= 100f;
+
+    float yawStep = yawDiff * yawScale * yawScale * yawScale * yawScale;
+    float pitchStep = pitchDiff * pitchScale * pitchScale * pitchScale * pitchScale;
+
+    float newYaw = srcYaw + yawStep;
+    float newPitch = Mth.clamp(srcPitch + pitchStep, -90f, 90f);
+
+    player.setYRot(newYaw);
+    player.setXRot(newPitch);
   }
 }
