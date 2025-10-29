@@ -1,18 +1,17 @@
 package com.nemo.suite.forge;
 
+import com.nemo.suite.NemoSuiteMod;
+import com.nemo.suite.config.ClientConfig;
+import com.nemo.suite.forge.client.NemoSuiteModForgeClient;
+
 import dev.architectury.platform.forge.EventBuses;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.client.ConfigGuiHandler;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
-import com.nemo.suite.NemoSuiteMod;
-import com.nemo.suite.config.ClientConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 @Mod(NemoSuiteMod.MOD_ID)
 public final class NemoSuiteModForge {
@@ -29,12 +28,7 @@ public final class NemoSuiteModForge {
         () -> new ConfigGuiHandler.ConfigGuiFactory(
             (mc, parent) -> AutoConfig.getConfigScreen(ClientConfig.class, parent).get()));
 
-    // Only do this on the client
-    DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> NemoSuiteMod::initClient);
-  }
-
-  @SubscribeEvent
-  public static void onRender(TickEvent.RenderTickEvent event) {
-    NemoSuiteMod.onRenderTick(event.renderTickTime);
+    if (FMLEnvironment.dist == Dist.CLIENT)
+      NemoSuiteModForgeClient.init();
   }
 }

@@ -59,15 +59,15 @@ public final class NemoSuiteMod {
     }
 
     if (isPlayerPlaying()) {
-      if (config.aimAssist.enabled)
-        AimAssist.tick();
       if (config.autoAttack.enabled)
         AutoAttack.tick();
     }
   }
 
   public static void onRenderTick(float tickDelta) {
-    if (config.aimAssist.enabled)
-      AimAssist.renderTick();
+    if (isPlayerPlaying()) {
+      if (config.aimAssist.enabled)
+        AimAssist.renderTick();
+    }
   }
 }
