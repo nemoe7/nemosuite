@@ -59,6 +59,8 @@ public final class NemoSuiteMod {
     }
 
     if (isPlayerPlaying()) {
+      if (config.aimAssist.enabled)
+        AimAssist.tick();
       if (config.autoAttack.enabled)
         AutoAttack.tick();
     }
