@@ -3,6 +3,8 @@ package com.nemo.suite.util;
 import java.util.List;
 import java.util.function.Function;
 
+import com.nemo.suite.mixin.MinecraftMixin;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -19,6 +21,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+
+import static com.nemo.suite.NemoSuiteMod.LOGGER;
 
 public class Wrapper {
   public static Minecraft client;
@@ -314,11 +318,19 @@ public class Wrapper {
     float yawDiff = Mth.wrapDegrees(targetYaw - srcYaw);
     float pitchDiff = Mth.wrapDegrees(targetPitch - srcPitch);
 
-    yawScale /= 100f;
-    pitchScale /= 100f;
+    float fps = ((MinecraftMixin) client).getFps();
+    float dt = 1f / fps;
 
-    float yawStep = yawDiff * yawScale * yawScale * yawScale * yawScale;
-    float pitchStep = pitchDiff * pitchScale * pitchScale * pitchScale * pitchScale;
+    // nonlinear scaling: 50 = 1s, 100 = ~instant
+    float t = yawScale / 100f;
+    float duration = (float) Math.pow(2.0, (1.0 - t) * 7.0); // steeper curve
+    duration /= 128f; // normalize so 50 ≈ 1s
+
+    float progress = dt / duration;
+    progress = Mth.clamp(progress, 0f, 1f);
+
+    float yawStep = yawDiff * progress;
+    float pitchStep = pitchDiff * progress;
 
     float newYaw = srcYaw + yawStep;
     float newPitch = Mth.clamp(srcPitch + pitchStep, -90f, 90f);
