@@ -22,8 +22,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import static com.nemo.suite.NemoSuiteMod.LOGGER;
-
 public class Wrapper {
   public static Minecraft client;
 
