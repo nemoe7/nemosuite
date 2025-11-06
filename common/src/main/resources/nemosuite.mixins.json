@@ -5,7 +5,7 @@
   "minVersion": "0.8",
   "client": [
     "ClientPacketListenerMixin",
-    "MinecraftMixin",
+    "MinecraftFpsAccessor",
     "SharedConstantsMixin"
   ],
   "mixins": [

@@ -3,7 +3,7 @@ package com.nemo.suite.util;
 import java.util.List;
 import java.util.function.Function;
 
-import com.nemo.suite.mixin.MinecraftMixin;
+import com.nemo.suite.mixin.MinecraftFpsAccessor;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -316,7 +316,7 @@ public class Wrapper {
     float yawDiff = Mth.wrapDegrees(targetYaw - srcYaw);
     float pitchDiff = Mth.wrapDegrees(targetPitch - srcPitch);
 
-    float fps = ((MinecraftMixin) client).getFps();
+    float fps = ((MinecraftFpsAccessor) client).getFps();
     float dt = 1f / fps;
 
     // nonlinear scaling: 50 = 1s, 100 = ~instant

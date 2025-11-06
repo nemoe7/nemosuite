@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(net.minecraft.client.Minecraft.class)
-public interface MinecraftMixin {
+public interface MinecraftFpsAccessor {
   @Accessor("fps")
   int getFps();
 }
