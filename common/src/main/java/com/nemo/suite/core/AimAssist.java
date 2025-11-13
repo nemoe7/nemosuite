@@ -1,5 +1,6 @@
 package com.nemo.suite.core;
 
+import static com.nemo.suite.NemoSuiteMod.printDebug;
 import static com.nemo.suite.util.Wrapper.getAttackCooldown;
 import static com.nemo.suite.util.Wrapper.getClosestEntityToCrosshair;
 import static com.nemo.suite.util.Wrapper.getClosestYawPitchToEntity;
@@ -36,26 +37,32 @@ public class AimAssist {
 
     if (inCombat) {
       int combatTime = config.combatTime > 0 ? config.combatTime : 20 + getAttackCooldown();
-
+      boolean isAttackReady = isAttackReady();
       if (config.combatTimeType == CombatTimeTypeEnum.ON_SWING ||
-          (config.combatTimeType == CombatTimeTypeEnum.ON_READY && isAttackReady())) {
+          (config.combatTimeType == CombatTimeTypeEnum.ON_READY && isAttackReady)) {
         combatTimer.tick();
+        printDebug("in combat, timer: {}/{}", combatTimer.getTicks(), combatTime);
       }
 
       if (combatTimer.reached(combatTime) ||
           !mainHand.getDisplayName().equals(getMainHand().getDisplayName())) {
         combatTimer.reset();
         inCombat = false;
+        printDebug("exiting combat");
         return;
       }
 
       List<Entity> entities = getNearbyEntities(Mob.class);
-      if (entities.isEmpty())
+      if (entities.isEmpty()) {
+        printDebug("no nearby entities");
         return;
+      }
 
       Entity closest = getClosestEntityToCrosshair(entities);
-      if (closest == null || (config.stopWhenReached && getCrosshairEntity() == closest))
+      if (closest == null || (config.stopWhenReached && getCrosshairEntity() == closest)) {
+        printDebug("no valid target");
         return;
+      }
 
       target = closest;
     }
