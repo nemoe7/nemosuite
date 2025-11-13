@@ -33,7 +33,10 @@ public class Wrapper {
    * @return true if the player and level are not null
    */
   public static boolean isPlayerPlaying() {
-    return client != null && client.player != null && client.level != null;
+    return client != null
+        && client.player != null
+        && client.level != null
+        && client.isPaused() == false;
   }
 
   /**
