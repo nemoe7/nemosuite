@@ -22,5 +22,8 @@
   "text.autoconfig.nemosuite.option.autoAttack.enabled": "Enable Auto Attack",
   "text.autoconfig.nemosuite.option.autoAttack.enabled.boolean.true": "§aENABLED",
   "text.autoconfig.nemosuite.option.autoAttack.enabled.boolean.false": "§cDISABLED",
-  "text.autoconfig.nemosuite.option.autoAttack.delayTicks": "Delay after attack is ready in ticks"
+  "text.autoconfig.nemosuite.option.autoAttack.delayTicks": "Delay after attack is ready in ticks",
+  "text.autoconfig.nemosuite.option.printDebug": "Enable Debug Printing",
+  "text.autoconfig.nemosuite.option.printDebug.boolean.true": "§aENABLED",
+  "text.autoconfig.nemosuite.option.printDebug.boolean.false": "§cDISABLED"
 }

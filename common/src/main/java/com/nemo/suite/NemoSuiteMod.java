@@ -72,4 +72,8 @@ public final class NemoSuiteMod {
         AimAssist.renderTick();
     }
   }
+
+  public static void printDebug(String key, Object... args) {
+    if (config.printDebug) LOGGER.info(key, args);
+  }
 }

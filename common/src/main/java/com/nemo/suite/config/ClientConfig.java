@@ -20,6 +20,8 @@ public class ClientConfig implements ConfigData {
   @ConfigEntry.Gui.TransitiveObject
   public AutoAttack autoAttack = new AutoAttack();
 
+  public boolean printDebug = false;
+
   public static class AutoAttack {
 
     public boolean enabled = true;
