@@ -54,11 +54,21 @@ public class AimAssist {
         }
       }
 
-      if (combatTimer.reached(combatTime) ||
-          !mainHand.getDisplayName().equals(getMainHand().getDisplayName())) {
+      if (combatTimer.reached(combatTime)) {
         combatTimer.reset();
         inCombat = false;
-        printDebug("exiting combat");
+        printDebug("exiting combat, timer reached");
+        return;
+      }
+
+      if (!mainHand.is(getMainHand().getItem())) {
+        combatTimer.reset();
+        inCombat = false;
+        printDebug("exiting combat, main hand changed: {} -> {}", mainHand.getItem(),
+            getMainHand().getItem());
+        if (config.actionBar) {
+          setActionBarText("");
+        }
         return;
       }
 
@@ -69,12 +79,18 @@ public class AimAssist {
       }
 
       Entity closest = getClosestEntityToCrosshair(entities);
-      if (closest == null || (config.stopWhenReached && getCrosshairEntity() == closest)) {
+      if (closest == null) {
         printDebug("no valid target");
         return;
       }
 
+      if (config.stopWhenReached && getCrosshairEntity() == closest) {
+        printDebug("target {} reached", closest.getDisplayName().getString());
+        return;
+      }
+
       target = closest;
+      printDebug("target={}", target.getName().getString());
     }
 
     mainHand = getMainHand();
