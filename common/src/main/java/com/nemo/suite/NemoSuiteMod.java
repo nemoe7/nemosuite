@@ -51,6 +51,7 @@ public final class NemoSuiteMod {
     config = AutoConfig.getConfigHolder(ClientConfig.class).getConfig();
     AimAssist.init();
     AutoAttack.init();
+    printDebug("Initialized config: {}", config);
   }
 
   private static void onClientPostTick(Minecraft client) {

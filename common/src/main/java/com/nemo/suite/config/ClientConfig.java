@@ -2,10 +2,12 @@ package com.nemo.suite.config;
 
 import static com.nemo.suite.NemoSuiteMod.MOD_ID;
 
+import org.jetbrains.annotations.NotNull;
+
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import net.minecraft.network.chat.TranslatableComponent;
+import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable;
 
 @Config(name = MOD_ID)
 public class ClientConfig implements ConfigData {
@@ -28,6 +30,14 @@ public class ClientConfig implements ConfigData {
 
     @ConfigEntry.BoundedDiscrete(max = 100)
     public int delayTicks = 0;
+
+    @Override
+    public String toString() {
+      return "{" +
+          "enabled=" + enabled +
+          ", delayTicks=" + delayTicks +
+          '}';
+    }
   }
 
   public static class AimAssist {
@@ -48,20 +58,43 @@ public class ClientConfig implements ConfigData {
 
     public boolean stopWhenReached = false;
 
-    public enum CombatTimeTypeEnum {
+    public enum CombatTimeTypeEnum implements Translatable{
       ON_SWING("text.autoconfig.nemosuite.option.aimAssist.combatTimeType.ON_SWING"),
       ON_READY("text.autoconfig.nemosuite.option.aimAssist.combatTimeType.ON_READY");
 
-      private final String translation;
+      private final String key;
 
-      CombatTimeTypeEnum(String i18nKey) {
-        translation = new TranslatableComponent(i18nKey).getString();
+      CombatTimeTypeEnum(String key) {
+        this.key = key;
       }
 
       @Override
-      public String toString() {
-        return translation;
+      public @NotNull String getKey() {
+        return key;
       }
     }
+
+    @Override
+    public String toString() {
+      return "{" +
+          "enabled=" + enabled +
+          ", yawScale=" + yawScale +
+          ", pitchScale=" + pitchScale +
+          ", combatTimeType=" + combatTimeType +
+          ", combatTime=" + combatTime +
+          ", stopWhenReached=" + stopWhenReached +
+          '}';
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "{" +
+        "enabled=" + enabled +
+        ", aimAssist=" + aimAssist +
+        ", allowSectionSign=" + allowSectionSign +
+        ", autoAttack=" + autoAttack +
+        ", printDebug=" + printDebug +
+        '}';
   }
 }
