@@ -8,6 +8,7 @@ import com.nemo.suite.mixin.MinecraftFpsAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -52,9 +53,7 @@ public class Wrapper {
    */
   public static boolean isAttackReady() {
     LocalPlayer player = client.player;
-    if (player == null)
-      return false;
-    return player.getAttackStrengthScale(0.0f) >= 1.0f;
+    return player != null && player.getAttackStrengthScale(0.0f) >= 1.0f;
   }
 
   /**
@@ -171,14 +170,17 @@ public class Wrapper {
       // Get distance between the two entities (rotations)
       float[] yawPitch = getClosestYawPitchBetween(client.player, entity);
 
+      if (yawPitch == null)
+        continue;
+
       // Compute the distance from the player's crosshair
       float distYaw = Mth.abs(Mth.wrapDegrees(yawPitch[0] - client.player.getRotationVector().y));
       float distPitch = Mth.abs(Mth.wrapDegrees(yawPitch[1] - client.player.getRotationVector().x));
-      float dist = Mth.sqrt(distYaw * distYaw + distPitch * distPitch);
+      float distSq = distYaw * distYaw + distPitch * distPitch;
 
-      if (dist < minDist) {
+      if (distSq < minDist) {
         closest = entity;
-        minDist = dist;
+        minDist = distSq;
       }
     }
 
@@ -209,7 +211,7 @@ public class Wrapper {
       // Check for blocks first
       BlockHitResult blockHit = source.level.clip(new ClipContext(
           eyePos, end,
-          ClipContext.Block.COLLIDER,
+          ClipContext.Block.OUTLINE,
           ClipContext.Fluid.NONE,
           source));
 
@@ -239,7 +241,7 @@ public class Wrapper {
       return yawPitch;
 
     // === 2. Scan up/down the entity’s height ===
-    float[] best = { srcYaw, srcPitch };
+    float[] best = null;
     float bestDelta = Float.MAX_VALUE;
 
     Vec3 bottom = new Vec3(center.x, box.minY, center.z);
@@ -338,5 +340,9 @@ public class Wrapper {
 
     player.setYRot(newYaw);
     player.setXRot(newPitch);
+  }
+
+  public static void setActionBarText(String text) {
+    client.player.displayClientMessage(Component.nullToEmpty(text), true);
   }
 }

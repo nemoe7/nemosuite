@@ -58,6 +58,11 @@ public class ClientConfig implements ConfigData {
 
     public boolean stopWhenReached = false;
 
+    public boolean actionBar = true;
+
+    @ConfigEntry.BoundedDiscrete(min = 10, max = 100)
+    public int actionBarWidth = 60;
+
     public enum CombatTimeTypeEnum implements Translatable{
       ON_SWING("text.autoconfig.nemosuite.option.aimAssist.combatTimeType.ON_SWING"),
       ON_READY("text.autoconfig.nemosuite.option.aimAssist.combatTimeType.ON_READY");

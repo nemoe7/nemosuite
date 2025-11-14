@@ -9,6 +9,7 @@ import static com.nemo.suite.util.Wrapper.getMainHand;
 import static com.nemo.suite.util.Wrapper.getNearbyEntities;
 import static com.nemo.suite.util.Wrapper.isAttackReady;
 import static com.nemo.suite.util.Wrapper.rotatePlayer;
+import static com.nemo.suite.util.Wrapper.setActionBarText;
 
 import java.util.List;
 
@@ -41,7 +42,16 @@ public class AimAssist {
       if (config.combatTimeType == CombatTimeTypeEnum.ON_SWING ||
           (config.combatTimeType == CombatTimeTypeEnum.ON_READY && isAttackReady)) {
         combatTimer.tick();
-        printDebug("in combat, timer: {}/{}", combatTimer.getTicks(), combatTime);
+        long ticks = combatTimer.getTicks();
+        printDebug("in combat, timer: {}/{}", ticks, combatTime);
+
+        if (config.actionBar) {
+          int filled = (int) ((ticks * config.actionBarWidth) / combatTime);
+          int empty = config.actionBarWidth - filled;
+
+          String bar = "§c" + "|".repeat(empty) + "§8" + "|".repeat(filled);
+          setActionBarText(bar);
+        }
       }
 
       if (combatTimer.reached(combatTime) ||
@@ -73,7 +83,12 @@ public class AimAssist {
   public static void renderTick() {
     if (inCombat && target != null) {
       float[] yawPitch = getClosestYawPitchToEntity(target);
-      rotatePlayer(yawPitch[0], yawPitch[1], config.yawScale, config.pitchScale);
+      if (yawPitch == null) {
+        printDebug("entity {} is obscured", target.getDisplayName().getString());
+        target = null;
+      } else {
+        rotatePlayer(yawPitch[0], yawPitch[1], config.yawScale, config.pitchScale);
+      }
     }
   }
 
