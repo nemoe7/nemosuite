@@ -3,6 +3,7 @@ package com.nemo.suite.core;
 import static com.nemo.suite.NemoSuiteMod.printDebug;
 import static com.nemo.suite.util.Wrapper.getAttackCooldown;
 import static com.nemo.suite.util.Wrapper.getClosestEntityToCrosshair;
+import static com.nemo.suite.util.Wrapper.getClosestEntityToPlayer;
 import static com.nemo.suite.util.Wrapper.getClosestYawPitchToEntity;
 import static com.nemo.suite.util.Wrapper.getCrosshairEntity;
 import static com.nemo.suite.util.Wrapper.getMainHand;
@@ -13,6 +14,7 @@ import static com.nemo.suite.util.Wrapper.setActionBarText;
 
 import java.util.List;
 
+import com.mojang.datafixers.util.Pair;
 import com.nemo.suite.NemoSuiteMod;
 import com.nemo.suite.config.ClientConfig;
 import com.nemo.suite.config.ClientConfig.AimAssist.CombatTimeTypeEnum;
@@ -78,6 +80,15 @@ public class AimAssist {
         return;
       }
 
+      if (config.distanceThreshold > 0) {
+        Pair<Entity, Double> nearest = getClosestEntityToPlayer(entities);
+        if (nearest != null && nearest.getSecond() <= config.distanceThreshold) {
+          target = nearest.getFirst();
+          printDebug("target within distance threshold: {}", target.getName().getString());
+          return;
+        }
+      }
+
       Entity closest = getClosestEntityToCrosshair(entities);
       if (closest == null) {
         printDebug("no valid target");
@@ -90,7 +101,7 @@ public class AimAssist {
       }
 
       target = closest;
-      printDebug("target={}", target.getName().getString());
+      printDebug("target: {}", target.getName().getString());
     }
 
     mainHand = getMainHand();

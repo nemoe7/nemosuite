@@ -56,11 +56,15 @@ public class ClientConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public int combatTime = 0;
 
+    @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+    @ConfigEntry.Gui.Tooltip
+    public int distanceThreshold = 0;
+
     public boolean stopWhenReached = false;
 
     public boolean actionBar = true;
 
-    @ConfigEntry.BoundedDiscrete(min = 10, max = 100)
+    @ConfigEntry.BoundedDiscrete(min = 20, max = 100)
     public int actionBarWidth = 60;
 
     public enum CombatTimeTypeEnum implements Translatable{

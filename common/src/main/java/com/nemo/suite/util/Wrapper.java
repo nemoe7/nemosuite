@@ -3,6 +3,7 @@ package com.nemo.suite.util;
 import java.util.List;
 import java.util.function.Function;
 
+import com.mojang.datafixers.util.Pair;
 import com.nemo.suite.mixin.MinecraftFpsAccessor;
 
 import net.minecraft.client.Minecraft;
@@ -72,7 +73,7 @@ public class Wrapper {
    */
   public static int getAttackCooldown() {
     double attackSpeed = client.player.getAttributeValue(Attributes.ATTACK_SPEED); // includes weapon modifiers
-    return (int) Math.ceil(20.0 / attackSpeed);
+    return (int) Mth.ceil(20.0 / attackSpeed);
   }
 
   /**
@@ -150,6 +151,29 @@ public class Wrapper {
         player.getX() + range, player.getY() + range, player.getZ() + range);
 
     return client.level.getEntitiesOfClass((Class<Entity>) entityClass, area);
+  }
+
+  public static Pair<Entity, Double> getClosestEntityToPlayer(List<Entity> entities) {
+    LocalPlayer player = client.player;
+    if (player == null)
+      return null;
+
+    double minDist = Double.MAX_VALUE;
+    Entity closest = null;
+
+    for (Entity entity : entities) {
+      if (entity == null || entity.isRemoved() || entity.isInvulnerable()
+          || (entity instanceof LivingEntity living && living.isDeadOrDying()))
+        continue;
+
+      double distSq = player.distanceToSqr(entity);
+      if (distSq < minDist && getClosestYawPitchToEntity(entity) != null) {
+        closest = entity;
+        minDist = distSq;
+      }
+    }
+
+    return new Pair<>(closest, (double) Mth.sqrt((float) minDist));
   }
 
   /**
@@ -295,8 +319,8 @@ public class Wrapper {
 
     double dist = Mth.sqrt((float) (diffX * diffX + diffZ * diffZ));
 
-    float yaw = (float) ((Math.atan2(diffZ, diffX) * 180.0D / Math.PI) - 90.0F);
-    float pitch = (float) -(Math.atan2(diffY, dist) * 180.0D / Math.PI);
+    float yaw = (float) ((Mth.atan2(diffZ, diffX) * 180.0D / Mth.PI) - 90.0F);
+    float pitch = (float) -(Mth.atan2(diffY, dist) * 180.0D / Mth.PI);
 
     return new float[] { yaw, pitch };
   }
